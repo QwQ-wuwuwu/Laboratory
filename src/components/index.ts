@@ -6,6 +6,8 @@ export const createAlert = (title:string, type:string, description:string) => {
     render(vnode, document.querySelector('#showAlert') as Element)
 }
 
-export const createDialog = () => {
-
+export const createDialog = (message:string) => {
+    const dialog = defineAsyncComponent(() => import('./DialogComponent.vue'))
+    const vnode = h(dialog, {message})
+    render(vnode, document.body)
 }

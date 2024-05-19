@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import { UserFilled, Lock } from "@element-plus/icons-vue";
-import { ref, onMounted } from "vue";
-import { saveAdmin, loginServer } from "../server";
+import { ref, onMounted, computed } from "vue";
+import { saveAdmin, loginServer, registerServer } from "../server";
 import { useRouter } from "vue-router";
 import { ResultVO, User } from "../types";
-import { createAlert } from "../components";
+import { createDialog } from "../components";
+import { ElMessage } from 'element-plus'
 
 const router = useRouter();
 onMounted(async () => {
@@ -17,18 +18,57 @@ const user = ref<User>({
   password: "",
 });
 const confirmP = ref("");
+let userName = ref(false);
+let userPassword = ref(false);
+let confirmPassword = ref(false);
 
+const judge = () => {
+  userName = computed(() => {
+    if (user.value.name.length === 0) {
+      return true
+    } else {
+      return false
+    }
+  });
+  userPassword = computed(() => {
+    if (user.value.password.length === 0) {
+      return true
+    } else {
+      return false
+    }
+  })
+  confirmPassword = computed(() => {
+    if (user.value.password !== confirmP.value) {
+      return true
+    } else {
+      return false
+    }
+  })
+};
 const login = async () => {
-  const resultVo:ResultVO<User> = await loginServer(user.value)
-  if(resultVo.code === 200) {
+  const resultVo: ResultVO<User> = await loginServer(user.value);
+  if (resultVo.code === 200) {
     router.push("/main");
-    createAlert('Success Alert', 'success', resultVo.message as string)
+    ElMessage({showClose: true, message: resultVo.message, type: 'success'})
   } else {
-    createAlert('Error Alert', 'error', resultVo.message as string)
-    user.value.password = ''
+    ElMessage({showClose: true, message: resultVo.message, type: 'error'})
+    user.value.password = "";
   }
 };
-const register = () => {
+const register = async() => {
+  const date = new Date()
+  const id = date.valueOf().toString().substring(0,10)
+  user.value.id = id
+  user.value.role = 1 
+  const resultVo:ResultVO<User> = await registerServer(user.value)
+  if(resultVo.code == 401) {
+    createDialog(resultVo.message as string)
+    user.value.name = ''
+    user.value.password = ''
+    confirmP.value = ''
+    return
+  }
+  ElMessage({showClose: true, message: resultVo.message, type: 'success'})
   flag.value = !flag.value;
 };
 </script>
@@ -54,12 +94,10 @@ const register = () => {
             size="large"
             :prefix-icon="UserFilled"
             placeholder="用户名"
+            @focus="judge"
             v-model="user.name"
           ></el-input>
-          <p
-            v-if="user.name === null"
-            style="font-size: xx-small; color: red; margin: 0"
-          >
+          <p v-if="userName" style="font-size: xx-small; color: red; margin: 0">
             用户名不能为空
           </p>
         </div>
@@ -70,10 +108,11 @@ const register = () => {
             :prefix-icon="Lock"
             placeholder="密码"
             :show-password="true"
+            @focus="judge"
             v-model.trim="user.password"
           ></el-input>
           <p
-            v-if="user.password === null"
+            v-if="userPassword"
             style="font-size: xx-small; color: red; margin: 0"
           >
             密码不能为空
@@ -89,7 +128,7 @@ const register = () => {
             v-model.trim="confirmP"
           ></el-input>
           <p
-            v-if="user.password === ' '"
+            v-if="confirmPassword"
             style="font-size: xx-small; color: red; margin: 0"
           >
             两次输入密码不一致
@@ -107,7 +146,12 @@ const register = () => {
             >已有账号，登录</span
           >
         </a>
-        <el-button type="primary" v-if="!flag" size="large" @click="login"
+        <el-button
+          type="primary"
+          v-if="!flag"
+          size="large"
+          @click="login"
+          :disabled="user.name == '' || user.password == ''"
           >登录</el-button
         >
         <el-button type="primary" v-if="flag" size="large" @click="register"

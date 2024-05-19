@@ -11,7 +11,9 @@ export const saveAdmin = async () => {
     users.push(admin)
     const res = await new Promise<User>((resolve) => {
         setTimeout(() => {
-            localStorage.setItem('users',JSON.stringify(users))
+            if(!localStorage.getItem('users')) {
+                localStorage.setItem('users',JSON.stringify(users))
+            }
             resolve(admin)
         }, 500);
     })
@@ -32,6 +34,28 @@ export const loginServer = async (user:User) => {
         } else {
             resultVo.code = 401
             resultVo.message = '账号密码错误'
+            resolve(resultVo)
+        }
+    })
+    return res
+}
+
+export const registerServer = async (user:User) => {
+    const resultVo:ResultVO<User> = { message: '' }
+    const res = await new Promise<ResultVO<User>>(resolve => {
+        const str = localStorage.getItem('users')
+        const userList:User[] = str && JSON.parse(str)
+        const tu = userList.find((u) => u.name === user.name && u.password === user.password)
+        if(tu) {
+            resultVo.code = 401
+            resultVo.message = '您的账号和密码与他人重复！'
+            resolve(resultVo)
+        } else {
+            userList.push(user)
+            localStorage.setItem('users', JSON.stringify(userList))
+            resultVo.code = 200
+            resultVo.message = '注册成功'
+            resultVo.data = user
             resolve(resultVo)
         }
     })
