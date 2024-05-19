@@ -1,7 +1,6 @@
 <template>
   <div>
-    <input type="text">
-    <p>hello</p>
+    <!-- -->
   </div>
 </template>
 

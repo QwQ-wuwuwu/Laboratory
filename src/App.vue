@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import LoginView from './view/LoginView.vue';
+
 </script>
 
 <template>
-  <LoginView/>
+    <div style="height: 100vh; width: 100vw;">
+        <router-view/>
+        <div id="showAlert"></div>
+    </div>
 </template>
-
-<style scoped>
-
-</style>
