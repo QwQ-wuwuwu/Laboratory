@@ -5,7 +5,6 @@ import { saveAdmin, loginServer, registerServer } from "../server";
 import { useRouter } from "vue-router";
 import { ResultVO, User } from "../types";
 import { createDialog } from "../components";
-import { ElMessage } from 'element-plus'
 
 const router = useRouter();
 onMounted(async () => {
@@ -83,7 +82,7 @@ const register = async() => {
       />
     </div>
     <div>
-      <h2 style="text-align: center; margin-top: 70px">实验室预约</h2>
+      <h1 style="text-align: center; margin-top: 80px">实验室预约</h1>
       <p style="text-align: center; font-size: small">
         教师灵活预约课程实验时间
       </p>
@@ -183,6 +182,9 @@ const register = async() => {
 </template>
 
 <style scoped>
+.el-input {
+  height: 100%;
+}
 .loginCard {
   position: absolute;
   top: 50%;
@@ -198,6 +200,7 @@ const register = async() => {
     justify-content: center;
     grid-template-rows: 60px 60px 60px;
     grid-template-columns: 18vw;
+    row-gap: 20px;
   }
   .footer {
     position: absolute;
