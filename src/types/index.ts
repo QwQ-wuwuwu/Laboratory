@@ -10,3 +10,18 @@ export type ResultVO<T> = {
     message?: string,
     data?: T
 }
+
+export type Course = {
+    tid?:string
+    name?:string
+    teacherName?:string
+    studyTime?:number
+    start?:number
+    end?:number
+    class?:string
+}
+
+export type Week = {
+    id:number
+    weekCourse: any[]
+}

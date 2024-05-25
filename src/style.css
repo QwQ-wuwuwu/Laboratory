@@ -11,10 +11,6 @@ body {
     background-color: whitesmoke;
 }
 
-.el-input__wrapper {
-  background-color: whitesmoke !important;
-}
-
 #showAlert {
   width: 50vw;
   position: absolute;

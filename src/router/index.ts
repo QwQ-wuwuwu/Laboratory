@@ -7,7 +7,21 @@ const routes = [
     },
     {
         path: '/main',
-        component: () => import('../view/MainView.vue')
+        component: () => import('../view/MainView.vue'),
+        children: [
+            {
+                path: 'course',
+                component: () => import('../pages/CoursePage.vue')
+            },
+            {
+                path: 'reservation',
+                component: () => import('../pages/ReservationPage.vue')
+            },
+            {
+                path: '',
+                component: () => import('../pages/ReservationPage.vue')
+            }
+        ]
     }
 ]
 

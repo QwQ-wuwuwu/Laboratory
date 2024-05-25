@@ -4,7 +4,7 @@ import { ref, onMounted, computed } from "vue";
 import { saveAdmin, loginServer, registerServer } from "../server";
 import { useRouter } from "vue-router";
 import { ResultVO, User } from "../types";
-import { createDialog } from "../components";
+import { createDialog, createId } from "../components";
 
 const router = useRouter();
 onMounted(async () => {
@@ -21,6 +21,7 @@ let userName = ref(false);
 let userPassword = ref(false);
 let confirmPassword = ref(false);
 
+createDialog('管理员账号：admin' + '  ' + '默认密码：admin' + '\n')
 const judge = () => {
   userName = computed(() => {
     if (user.value.name.length === 0) {
@@ -55,10 +56,9 @@ const login = async () => {
   }
 };
 const register = async() => {
-  const date = new Date()
-  const id = date.valueOf().toString().substring(0,10)
+  const id = createId()
   user.value.id = id
-  user.value.role = 1 
+  user.value.role = 0 
   const resultVo:ResultVO<User> = await registerServer(user.value)
   if(resultVo.code == 401) {
     createDialog(resultVo.message as string)
@@ -68,6 +68,7 @@ const register = async() => {
     return
   }
   ElMessage({showClose: true, message: resultVo.message, type: 'success'})
+  user.value.password = ''
   flag.value = !flag.value;
 };
 </script>
@@ -138,10 +139,10 @@ const register = async() => {
           @click.prevent="flag = !flag"
           style="font-size: xx-small; text-align: center; margin-bottom: 15px"
         >
-          <span v-if="!flag" style="color: blue; font-weight: 500"
+          <span v-if="!flag" style="color: blue; font-size: medium;"
             >没有账号？注册</span
           >
-          <span v-if="flag" style="color: blue; font-weight: 500"
+          <span v-if="flag" style="color: blue; font-size: medium;"
             >已有账号，登录</span
           >
         </a>
@@ -182,6 +183,9 @@ const register = async() => {
 </template>
 
 <style scoped>
+.el-input__wrapper {
+  background-color: whitesmoke !important;
+}
 .el-input {
   height: 100%;
 }

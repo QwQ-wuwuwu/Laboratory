@@ -11,3 +11,9 @@ export const createDialog = (message:string) => {
     const vnode = h(dialog, {message})
     render(vnode, document.body)
 }
+
+export const createId = ():string => {
+    const date = new Date()
+    const id = date.valueOf().toString().substring(0,10)
+    return id
+}
