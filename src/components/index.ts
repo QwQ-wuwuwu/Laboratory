@@ -6,9 +6,11 @@ export const createAlert = (title:string, type:string, description:string) => {
     render(vnode, document.querySelector('#showAlert') as Element)
 }
 
-export const createDialog = (message:string) => {
+export const createDialog = (message:string, confirm?:() => void) => {
     const dialog = defineAsyncComponent(() => import('./DialogComponent.vue'))
-    const vnode = h(dialog, {message})
+    const vnode = h(dialog, {message, onConfirm: () => { // onConfirm是传递给子组件的事件回调函数
+        confirm && confirm()
+    }})
     render(vnode, document.body)
 }
 

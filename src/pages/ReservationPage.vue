@@ -22,7 +22,9 @@
           <div class="empty">
             {{ r.tx }} <br> {{ r.time }}
           </div>
-          <div class="onetwo" data-hover-text="预约" v-for="(c, index) of r.courses" :id="`${r.id}-${c.wid}`"
+          <div data-hover-text="预约" v-for="(c, index) of r.courses" :id="`${r.id}-${c.wid}`" 
+            :class="[{onetwo: c.class === ''}, {activeStyle: c.class !== ''}]"
+            style="display: flex; justify-content: center; align-items: center;"
             @click="(e) => reservation(e)" :key="index">
             <span>{{ c.class }} <br> {{ c.teacher }}</span>
           </div>
@@ -37,7 +39,7 @@ import { ref, onMounted, computed } from 'vue';
 import { createDialog } from '../components';
 import { LaBoratories, createAll } from '../server/data';
 import { useRouter } from 'vue-router';
-import { findCourse, getCourse, saveReser } from '../server';
+import { deleteReser, findCourse, getCourse, getLaboratory, saveReser } from '../server';
 import { Course, User } from '../types';
 
 const router = useRouter()
@@ -72,20 +74,23 @@ const reservation = (event:any) => {
     createDialog('预约实验室冲突，请选择其他时段')
     return
   } else if(c.tid === user.id) {
-    createDialog('删除本次预约？')
+    createDialog('你的意思是删除本次预约？', () => {
+      all.value = deleteReser(laboraotry.value, currentPage.value, rid, wid)
+    })
     return 
-  }
-  if(!laboraotry.value) {
-    createDialog('请先选择实验室后再预约')
-    return
   }
   let newCourse:any = {wid}
   newCourse.class = course.value.name
   newCourse.addr = laboraotry.value
   newCourse.teacher = course.value.teacherName
   newCourse.tid = user.id
-  all.value = saveReser(newCourse, laboraotry.value, currentPage.value, rid, wid)
-  ElMessage({showClose: true, message: '预约实验室成功', type: 'success'})
+  const lab = getLaboratory(laboraotry.value)
+  createDialog(`确定预约第${currentPage.value}周，  周${wid}，  第${rid.substring(0,1)}到第${rid.substring(1,2)}节课，  ${lab?.name}吗`,
+    () => {
+      const res = saveReser(newCourse, laboraotry.value, currentPage.value, rid, wid)
+      all.value = res.data
+      res.code === 200 && ElMessage({showClose: true, message: '预约实验室成功', type: 'success'})
+    })
 }
 </script>
 
@@ -128,7 +133,6 @@ const reservation = (event:any) => {
       display: flex;
       justify-content: center;
       align-items: center;
-      /* border: 0.1px solid skyblue; */
     }
     .onetwo::after {
       content: attr(data-hover-text);
@@ -147,7 +151,6 @@ const reservation = (event:any) => {
         display: none;
       }
       background-color: skyblue;
-      border: 1px solid skyblue;
       border-radius: 10px;
     }
     .empty {
@@ -158,5 +161,10 @@ const reservation = (event:any) => {
       color: rgb(178, 175, 175);
     }
   }
+}
+.activeStyle {
+  background-color: pink;
+  border-radius: 10px;
+  margin: 5px;
 }
 </style>

@@ -66,6 +66,9 @@ const setActiveNav = (num:number) => {
   if(num === 2) {
     router.push('/main/reservation')
   }
+  if(num === 3) {
+    router.push('/main/admin')
+  }
 }
 const logout = () => {
   //@ts-ignore

@@ -18,6 +18,10 @@ const routes = [
                 component: () => import('../pages/ReservationPage.vue')
             },
             {
+                path: 'admin',
+                component: () => import('../pages/AdminPage.vue')
+            },
+            {
                 path: '',
                 component: () => import('../pages/ReservationPage.vue')
             }
