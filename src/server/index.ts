@@ -1,8 +1,5 @@
-import courseStore from "../store/Course";
 import { Course, ResultVO, User } from "../types";
 import { LaBoratories } from "./data";
-
-const useCourse = courseStore();
 
 export const saveAdmin = async () => {
   const admin: User = {
@@ -71,6 +68,13 @@ export const registerServer = async (user: User) => {
   return res;
 };
 
+export const initCourse = () => {
+  if (!localStorage.getItem("courses")) {
+    let arr: Course[] = [];
+    localStorage.setItem("courses", JSON.stringify(arr));
+  }
+}
+
 export const saveCourse = async (course: Course) => {
   const resultVo: ResultVO<Course> = { message: "" };
   const user: User = JSON.parse(sessionStorage.getItem("user") as string);
@@ -83,9 +87,9 @@ export const saveCourse = async (course: Course) => {
     localStorage.getItem("courses") as string
   );
   const res = await new Promise<ResultVO<Course>>((resolve) => {
-    let index = courses.findIndex((c) => c.tid === user.id);
+    let index = courses.findIndex((c) => c.name === user.name && c.tid === user.id);
     if (index !== -1) {
-      courses[index] = course;
+      ElMessage({showClose: true, message: '课程已存在，不可重复添加', type: 'error'})
     } else {
       courses.push(course);
     }
@@ -98,26 +102,11 @@ export const saveCourse = async (course: Course) => {
   return res;
 };
 
-export const getCourse = async () => {
-  const resultVo: ResultVO<Course> = { code: 200, message: "" };
-  let courseS = useCourse.course;
-  return await new Promise<ResultVO<Course>>((resolve) => {
-    if (courseS.name) {
-      resultVo.message = "获取课程信息成功";
-      resultVo.data = courseS;
-      resolve(resultVo);
-    } else {
-      const user: User = JSON.parse(sessionStorage.getItem("user") as string);
-      const courses: Course[] = JSON.parse(
-        localStorage.getItem("courses") as string
-      );
-      const course = courses.find((c) => c.tid === user.id);
-      useCourse.course = course as Course;
-      resultVo.data = course;
-      resolve(resultVo);
-    }
-  });
-};
+export const getUserCourses = () => {
+  const user = JSON.parse(sessionStorage.getItem('user') as string)
+  const courses = JSON.parse(localStorage.getItem('courses') as string)
+  return courses.filter((c:any) => c.tid === user.id)
+}
 
 export const findCourse = (rid: string, wid: string, weekCourse: any[]) => {
   const cs = weekCourse.filter((wc) => wc.id === rid)[0];
@@ -205,8 +194,11 @@ export const getLaboratory = (id: number) => {
 
 export const clearAll = () => {
     localStorage.setItem('all', '')
+    ElMessage({showClose: true, message: '清除成功', type: 'success'})
 }
 
 export const clearCourse = () => {
-    localStorage.setItem('courses', '')
+  let arr:any[] = []
+  localStorage.setItem('courses', JSON.stringify(arr))
+  ElMessage({showClose: true, message: '清除成功', type: 'success'})
 }

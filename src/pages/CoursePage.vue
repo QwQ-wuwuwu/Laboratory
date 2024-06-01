@@ -1,5 +1,14 @@
 <template>
-  <div style="width: 100%; height: 100%;">
+  <div class="main" style="width: 100%; height: 100%;">
+    <div class="left">
+        <h2 style="color: rgb(141, 137, 137);">已录入的课程</h2>
+        <el-table :data="tableCourses" stripe style="width: 100%">
+            <el-table-column type="index" label="#" />
+            <el-table-column prop="name" label="课程" />
+            <el-table-column prop="teacherName" label="老师" />
+            <el-table-column prop="studyTime" label="学时" style="margin-right: 0;" />
+        </el-table>
+    </div>
     <div class="add-card">
         <div class="header">
             <span style="font-size: larger; margin-left: 30px; color: skyblue;">录入</span>
@@ -52,11 +61,12 @@
 import { CloseBold } from "@element-plus/icons-vue"
 import { ref, onMounted, watch } from "vue";
 import { Course, ResultVO } from "../types";
-import { getCourse, saveCourse } from "../server";
+import { getUserCourses, saveCourse } from "../server";
 // import { useRouter } from "vue-router";
 
 const course = ref<Course>({})
 // const router = useRouter()
+const tableCourses = ref([])
 
 watch(course.value, () => {
     if(course.value.studyTime && course.value.studyTime <= 0) {
@@ -65,14 +75,16 @@ watch(course.value, () => {
         course.value.studyTime = null
     }
 })
-onMounted(async () => {
-    const resultVo = await getCourse()
-    course.value = resultVo.data as Course
+
+onMounted(() => {
+    tableCourses.value = getUserCourses()
 })
+
 const save = async () => {
     const resultVo:ResultVO<Course> = await saveCourse(course.value)
     course.value = resultVo.data as Course
     ElMessage({showClose: true, message: resultVo.message, type: 'success'})
+    tableCourses.value = getUserCourses()
 }
 const pageto = () => {
     // router.push('/main/reservation')
@@ -83,15 +95,20 @@ const pageto = () => {
 .el-input {
     width: 300px;
 }
+.main {
+    display: flex;
+    justify-content: space-evenly;
+}
+.left {
+    margin-top: 80px;
+    width: 40%;
+}
 .add-card {
     height: 80%;
-    width: 50%;
+    margin-top: 80px;
+    width: 40%;
     background-color: whitesmoke;
     border-radius: 10px;
-    position: relative;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     display: grid;
     grid-template-rows: 10% 80% 10%;
     .header {

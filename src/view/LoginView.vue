@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { UserFilled, Lock } from "@element-plus/icons-vue";
 import { ref, onMounted, computed } from "vue";
-import { saveAdmin, loginServer, registerServer } from "../server";
+import { saveAdmin, loginServer, registerServer, initCourse } from "../server";
 import { useRouter } from "vue-router";
 import { ResultVO, User } from "../types";
 import { createDialog, createId } from "../components";
@@ -9,19 +9,19 @@ import { createDialog, createId } from "../components";
 const router = useRouter();
 onMounted(async () => {
   await saveAdmin();
+  initCourse()
 });
 
 const flag = ref(false);
 const user = ref<User>({
-  name: "",
-  password: "",
+  name: "admin",
+  password: "admin",
 });
 const confirmP = ref("");
 let userName = ref(false);
 let userPassword = ref(false);
 let confirmPassword = ref(false);
 
-createDialog('管理员账号：admin' + '  ' + '默认密码：admin' + '\n')
 const judge = () => {
   userName = computed(() => {
     if (user.value.name.length === 0) {

@@ -1,6 +1,9 @@
 <template>
   <div class="reservation" style="height: 100%; width: 100%;">
     <div class="pagination">
+      <el-select v-model="selectedName" placeholder="请选择实验课程后预约" style="width: 240px; margin-right: 100px" size="large">
+        <el-option v-for="(c,index) of courses" :key="index" :label="c.name" :value="c.name" />
+      </el-select>
       <el-select v-model="laboraotry" placeholder="请选择实验室后预约" style="width: 240px; margin-right: 100px" size="large">
         <el-option v-for="l of LaBoratories" :key="l.id" :label="l.name" :value="l.id" />
       </el-select>
@@ -35,36 +38,41 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
-import { createDialog } from '../components';
-import { LaBoratories, createAll } from '../server/data';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { deleteReser, findCourse, getCourse, getLaboratory, saveReser } from '../server';
+import { createDialog } from '../components';
+import { deleteReser, findCourse, getLaboratory, getUserCourses, saveReser } from '../server';
+import { LaBoratories, createAll } from '../server/data';
 import { Course, User } from '../types';
 
 const router = useRouter()
 const currentPage = ref(1)
 const laboraotry = ref(1)
-const course = ref<Course>()
+const selectedName = ref()
 const user:User = JSON.parse(sessionStorage.getItem('user') as string)
 const all = ref(createAll(4))
+const courses = ref<Course[]>([])
 const laboraotryWeek = computed(() => {
   return all.value.find((a:any) => a.id === laboraotry.value)
 })
 const week = computed(() => {
   return laboraotryWeek.value.weeks.find((w:any) => w.id === currentPage.value)
 })
-
 onMounted(async () => {
-  course.value = (await getCourse()).data
+  courses.value = getUserCourses()
 })
 const setPage = (page:number) => {
   currentPage.value = page
 }
 const reservation = (event:any) => {
-  if(!course.value) {
+  if(courses.value.length === 0) {
     createDialog('未录入实验课信息，请先录入')
     router.push('/main/course')
+    return
+  }
+  const selectedCourse = courses.value.find((c:any) => c.name == selectedName.value)  as Course
+  if(!selectedName.value) {
+    ElMessage({showClose: true, message: '未选择实验课程', type: 'error'})
     return
   }
   const rid = event.target.id.split('-')[0]
@@ -80,9 +88,9 @@ const reservation = (event:any) => {
     return 
   }
   let newCourse:any = {wid}
-  newCourse.class = course.value.name
+  newCourse.class = selectedCourse.name
   newCourse.addr = laboraotry.value
-  newCourse.teacher = course.value.teacherName
+  newCourse.teacher = selectedCourse.teacherName
   newCourse.tid = user.id
   const lab = getLaboratory(laboraotry.value)
   createDialog(`确定预约第${currentPage.value}周，  周${wid}，  第${rid.substring(0,1)}到第${rid.substring(1,2)}节课，  ${lab?.name}吗`,
@@ -97,7 +105,7 @@ const reservation = (event:any) => {
 <style scoped>
 .reservation {
   display: grid;
-  grid-template-rows: 20% 80%;
+  grid-template-rows: 15% 85%;
 }
 .pagination {
   display: flex;

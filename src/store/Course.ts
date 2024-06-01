@@ -3,8 +3,8 @@ import { ref } from "vue";
 import { Course } from "../types";
 
 const courseStore = defineStore('courseStore', () => {
-    const course = ref<Course>({})
-    return { course }
+    const courses = ref<Course[]>([])
+    return { courses }
 })
 
 export default courseStore
